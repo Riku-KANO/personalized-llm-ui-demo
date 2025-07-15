@@ -1,26 +1,6 @@
 'use client'
 
-interface UIComponent {
-  type: 'hero' | 'card' | 'list' | 'button' | 'text' | 'sidebar' | 'navigation' | 'content-area'
-  title: string
-  content: string
-  backgroundColor: string
-  textColor: string
-  borderColor?: string
-  customStyle?: string
-  width?: 'full' | 'half' | 'third' | 'quarter' | 'sidebar'
-  position?: 'left' | 'right' | 'center' | 'top' | 'bottom'
-}
-
-interface GeneratedUI {
-  type: 'dashboard' | 'profile' | 'gallery' | 'blog' | 'shop'
-  title: string
-  description: string
-  primaryColor: string
-  accentColor: string
-  layout: 'vertical' | 'horizontal' | 'sidebar-left' | 'sidebar-right' | 'grid'
-  components: UIComponent[]
-}
+import { UIComponent, GeneratedUI } from '@/types/ui'
 
 interface DynamicUIProps {
   ui: GeneratedUI
@@ -33,7 +13,122 @@ export default function DynamicUI({ ui }: DynamicUIProps) {
       case 'third': return 'w-1/3'
       case 'quarter': return 'w-1/4'
       case 'sidebar': return 'w-64'
+      case 'auto': return 'w-auto'
+      case 'fit': return 'w-fit'
       default: return 'w-full'
+    }
+  }
+
+  const getHeightClass = (height?: string) => {
+    switch (height) {
+      case 'screen': return 'h-screen'
+      case 'full': return 'h-full'
+      case 'fit': return 'h-fit'
+      default: return 'h-auto'
+    }
+  }
+
+  const getPositionClass = (position?: string) => {
+    switch (position) {
+      case 'absolute': return 'absolute'
+      case 'relative': return 'relative'
+      case 'fixed': return 'fixed'
+      case 'sticky': return 'sticky'
+      default: return 'relative'
+    }
+  }
+
+  const getFlexDirectionClass = (flexDirection?: string) => {
+    switch (flexDirection) {
+      case 'row': return 'flex-row'
+      case 'column': return 'flex-col'
+      case 'row-reverse': return 'flex-row-reverse'
+      case 'column-reverse': return 'flex-col-reverse'
+      default: return 'flex-col'
+    }
+  }
+
+  const getAlignItemsClass = (alignItems?: string) => {
+    switch (alignItems) {
+      case 'start': return 'items-start'
+      case 'center': return 'items-center'
+      case 'end': return 'items-end'
+      case 'stretch': return 'items-stretch'
+      case 'baseline': return 'items-baseline'
+      default: return 'items-start'
+    }
+  }
+
+  const getJustifyContentClass = (justifyContent?: string) => {
+    switch (justifyContent) {
+      case 'start': return 'justify-start'
+      case 'center': return 'justify-center'
+      case 'end': return 'justify-end'
+      case 'between': return 'justify-between'
+      case 'around': return 'justify-around'
+      case 'evenly': return 'justify-evenly'
+      default: return 'justify-start'
+    }
+  }
+
+  const getGapClass = (gap?: string) => {
+    switch (gap) {
+      case 'none': return 'gap-0'
+      case 'xs': return 'gap-1'
+      case 'sm': return 'gap-2'
+      case 'md': return 'gap-4'
+      case 'lg': return 'gap-6'
+      case 'xl': return 'gap-8'
+      default: return 'gap-4'
+    }
+  }
+
+  const getPaddingClass = (padding?: string) => {
+    switch (padding) {
+      case 'none': return 'p-0'
+      case 'xs': return 'p-1'
+      case 'sm': return 'p-2'
+      case 'md': return 'p-4'
+      case 'lg': return 'p-6'
+      case 'xl': return 'p-8'
+      default: return 'p-4'
+    }
+  }
+
+  const getMarginClass = (margin?: string) => {
+    switch (margin) {
+      case 'none': return 'm-0'
+      case 'xs': return 'm-1'
+      case 'sm': return 'm-2'
+      case 'md': return 'm-4'
+      case 'lg': return 'm-6'
+      case 'xl': return 'm-8'
+      default: return 'm-0'
+    }
+  }
+
+  const getGridColsClass = (gridCols?: number) => {
+    switch (gridCols) {
+      case 1: return 'grid-cols-1'
+      case 2: return 'grid-cols-2'
+      case 3: return 'grid-cols-3'
+      case 4: return 'grid-cols-4'
+      case 5: return 'grid-cols-5'
+      case 6: return 'grid-cols-6'
+      case 12: return 'grid-cols-12'
+      default: return 'grid-cols-1'
+    }
+  }
+
+  const getGridRowsClass = (gridRows?: number) => {
+    switch (gridRows) {
+      case 1: return 'grid-rows-1'
+      case 2: return 'grid-rows-2'
+      case 3: return 'grid-rows-3'
+      case 4: return 'grid-rows-4'
+      case 5: return 'grid-rows-5'
+      case 6: return 'grid-rows-6'
+      default: return 'grid-rows-1'
     }
   }
 
@@ -43,6 +138,7 @@ export default function DynamicUI({ ui }: DynamicUIProps) {
       case 'sidebar-left': return 'flex flex-row'
       case 'sidebar-right': return 'flex flex-row-reverse'
       case 'grid': return 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
+      case 'complex': return 'flex flex-col'
       default: return 'flex flex-col space-y-6'
     }
   }
@@ -52,13 +148,37 @@ export default function DynamicUI({ ui }: DynamicUIProps) {
       backgroundColor: component.backgroundColor,
       color: component.textColor,
       borderColor: component.borderColor,
+      order: component.order,
+      zIndex: component.zIndex,
     }
 
     const customClasses = component.customStyle || ''
     const widthClass = getWidthClass(component.width)
-    const isFlexLayout = ui.layout === 'horizontal' || ui.layout.includes('sidebar')
-
-    const wrapperClasses = isFlexLayout ? `${widthClass} ${customClasses}` : customClasses
+    const heightClass = getHeightClass(component.height)
+    const positionClass = getPositionClass(component.position)
+    const flexDirectionClass = getFlexDirectionClass(component.flexDirection)
+    const alignItemsClass = getAlignItemsClass(component.alignItems)
+    const justifyContentClass = getJustifyContentClass(component.justifyContent)
+    const gapClass = getGapClass(component.gap)
+    const paddingClass = getPaddingClass(component.padding)
+    const marginClass = getMarginClass(component.margin)
+    const gridColsClass = getGridColsClass(component.gridCols)
+    const gridRowsClass = getGridRowsClass(component.gridRows)
+    
+    const isFlexLayout = ui.layout === 'horizontal' || ui.layout.includes('sidebar') || ui.layout === 'complex'
+    const isFlexComponent = component.type === 'flex'
+    const isGridComponent = component.type === 'grid'
+    
+    const wrapperClasses = [
+      widthClass,
+      heightClass,
+      positionClass,
+      paddingClass,
+      marginClass,
+      customClasses,
+      isFlexComponent ? `flex ${flexDirectionClass} ${alignItemsClass} ${justifyContentClass} ${gapClass}` : '',
+      isGridComponent ? `grid ${gridColsClass} ${gridRowsClass} ${gapClass}` : ''
+    ].filter(Boolean).join(' ')
 
     switch (component.type) {
       case 'hero':
@@ -183,6 +303,84 @@ export default function DynamicUI({ ui }: DynamicUIProps) {
                 <p key={pIndex} className="mb-4">{paragraph}</p>
               ))}
             </div>
+          </div>
+        )
+
+      case 'container':
+        return (
+          <div 
+            key={index} 
+            className={`${wrapperClasses}`}
+            style={baseStyle}
+          >
+            {component.title && <h3 className="text-lg font-semibold mb-2">{component.title}</h3>}
+            {component.children && component.children.map((child, childIndex) => renderComponent(child, childIndex))}
+          </div>
+        )
+
+      case 'section':
+        return (
+          <section 
+            key={index} 
+            className={`${wrapperClasses}`}
+            style={baseStyle}
+          >
+            {component.title && <h2 className="text-2xl font-bold mb-4">{component.title}</h2>}
+            <div className="space-y-4">
+              {component.children && component.children.map((child, childIndex) => renderComponent(child, childIndex))}
+            </div>
+          </section>
+        )
+
+      case 'header':
+        return (
+          <header 
+            key={index} 
+            className={`${wrapperClasses}`}
+            style={baseStyle}
+          >
+            <h1 className="text-3xl font-bold">{component.title}</h1>
+            {component.content && <p className="text-lg mt-2">{component.content}</p>}
+            {component.children && component.children.map((child, childIndex) => renderComponent(child, childIndex))}
+          </header>
+        )
+
+      case 'footer':
+        return (
+          <footer 
+            key={index} 
+            className={`${wrapperClasses}`}
+            style={baseStyle}
+          >
+            <div className="text-center">
+              <h3 className="text-lg font-semibold mb-2">{component.title}</h3>
+              {component.content && <p className="text-sm">{component.content}</p>}
+            </div>
+            {component.children && component.children.map((child, childIndex) => renderComponent(child, childIndex))}
+          </footer>
+        )
+
+      case 'flex':
+        return (
+          <div 
+            key={index} 
+            className={`${wrapperClasses}`}
+            style={baseStyle}
+          >
+            {component.title && <h3 className="text-lg font-semibold mb-2">{component.title}</h3>}
+            {component.children && component.children.map((child, childIndex) => renderComponent(child, childIndex))}
+          </div>
+        )
+
+      case 'grid':
+        return (
+          <div 
+            key={index} 
+            className={`${wrapperClasses}`}
+            style={baseStyle}
+          >
+            {component.title && <h3 className="text-lg font-semibold mb-2">{component.title}</h3>}
+            {component.children && component.children.map((child, childIndex) => renderComponent(child, childIndex))}
           </div>
         )
 

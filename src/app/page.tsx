@@ -3,26 +3,7 @@
 import { useState } from 'react'
 import PreferencesForm from '@/components/PreferencesForm'
 import DynamicUI from '@/components/DynamicUI'
-
-interface GeneratedUI {
-  type: 'dashboard' | 'profile' | 'gallery' | 'blog' | 'shop'
-  title: string
-  description: string
-  primaryColor: string
-  accentColor: string
-  layout: 'vertical' | 'horizontal' | 'sidebar-left' | 'sidebar-right' | 'grid'
-  components: Array<{
-    type: 'hero' | 'card' | 'list' | 'button' | 'text' | 'sidebar' | 'navigation' | 'content-area'
-    title: string
-    content: string
-    backgroundColor: string
-    textColor: string
-    borderColor?: string
-    customStyle?: string
-    width?: 'full' | 'half' | 'third' | 'quarter' | 'sidebar'
-    position?: 'left' | 'right' | 'center' | 'top' | 'bottom'
-  }>
-}
+import { GeneratedUI } from '@/types/ui'
 
 export default function Home() {
   const [generatedUI, setGeneratedUI] = useState<GeneratedUI | null>(null)
