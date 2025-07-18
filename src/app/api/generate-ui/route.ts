@@ -29,7 +29,7 @@ const UIComponentSchema = z.object({
 })
 
 const UISchema = z.object({
-  type: z.enum(['dashboard', 'profile', 'gallery', 'blog', 'shop']),
+  type: z.enum(['dashboard', 'profile', 'gallery', 'blog', 'shop', 'complex']),
   title: z.string(),
   description: z.string(),
   primaryColor: z.string(),
@@ -159,6 +159,145 @@ export async function POST(request: NextRequest) {
               textColor: "#1f2937",
               width: "full",
               padding: "lg"
+            }
+          ]
+        }
+      ]
+
+      例（3x3フレックスレイアウト）：
+      layout: "complex"
+      components: [
+        {
+          id: "main-container-1",
+          type: "flex",
+          title: "3x3レイアウト",
+          content: "",
+          backgroundColor: "#f9fafb",
+          textColor: "#1f2937",
+          width: "full",
+          flexDirection: "column",
+          gap: "md",
+          padding: "md",
+          children: [
+            {
+              id: "row-1",
+              type: "flex",
+              title: "",
+              content: "",
+              backgroundColor: "transparent",
+              textColor: "#1f2937",
+              width: "full",
+              flexDirection: "row",
+              gap: "md",
+              children: [
+                {
+                  id: "card-1-1",
+                  type: "card",
+                  title: "カード1",
+                  content: "1行目1列目",
+                  backgroundColor: "#ffffff",
+                  textColor: "#1f2937",
+                  width: "third"
+                },
+                {
+                  id: "card-1-2",
+                  type: "card",
+                  title: "カード2",
+                  content: "1行目2列目",
+                  backgroundColor: "#ffffff",
+                  textColor: "#1f2937",
+                  width: "third"
+                },
+                {
+                  id: "card-1-3",
+                  type: "card",
+                  title: "カード3",
+                  content: "1行目3列目",
+                  backgroundColor: "#ffffff",
+                  textColor: "#1f2937",
+                  width: "third"
+                }
+              ]
+            },
+            {
+              id: "row-2",
+              type: "flex",
+              title: "",
+              content: "",
+              backgroundColor: "transparent",
+              textColor: "#1f2937",
+              width: "full",
+              flexDirection: "row",
+              gap: "md",
+              children: [
+                {
+                  id: "card-2-1",
+                  type: "card",
+                  title: "カード4",
+                  content: "2行目1列目",
+                  backgroundColor: "#ffffff",
+                  textColor: "#1f2937",
+                  width: "third"
+                },
+                {
+                  id: "card-2-2",
+                  type: "card",
+                  title: "カード5",
+                  content: "2行目2列目",
+                  backgroundColor: "#ffffff",
+                  textColor: "#1f2937",
+                  width: "third"
+                },
+                {
+                  id: "card-2-3",
+                  type: "card",
+                  title: "カード6",
+                  content: "2行目3列目",
+                  backgroundColor: "#ffffff",
+                  textColor: "#1f2937",
+                  width: "third"
+                }
+              ]
+            },
+            {
+              id: "row-3",
+              type: "flex",
+              title: "",
+              content: "",
+              backgroundColor: "transparent",
+              textColor: "#1f2937",
+              width: "full",
+              flexDirection: "row",
+              gap: "md",
+              children: [
+                {
+                  id: "card-3-1",
+                  type: "card",
+                  title: "カード7",
+                  content: "3行目1列目",
+                  backgroundColor: "#ffffff",
+                  textColor: "#1f2937",
+                  width: "third"
+                },
+                {
+                  id: "card-3-2",
+                  type: "card",
+                  title: "カード8",
+                  content: "3行目2列目",
+                  backgroundColor: "#ffffff",
+                  textColor: "#1f2937",
+                  width: "third"
+                },
+                {
+                  id: "card-3-3",
+                  type: "card",
+                  title: "カード9",
+                  content: "3行目3列目",
+                  backgroundColor: "#ffffff",
+                  textColor: "#1f2937",
+                  width: "third"
+                }
+              ]
             }
           ]
         }

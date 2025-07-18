@@ -1,79 +1,47 @@
-'use client'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { redirect } from 'next/navigation'
+import AuthButton from '@/components/AuthButton'
 
-import { useState } from 'react'
-import PreferencesForm from '@/components/PreferencesForm'
-import DynamicUI from '@/components/DynamicUI'
-import { GeneratedUI } from '@/types/ui'
+export default async function Home() {
+  const session = await getServerSession(authOptions)
 
-export default function Home() {
-  const [generatedUI, setGeneratedUI] = useState<GeneratedUI | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  const handleGenerate = async (preferences: string) => {
-    setIsLoading(true)
-    setError(null)
-    
-    try {
-      const response = await fetch('/api/generate-ui', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ preferences }),
-      })
-
-      if (!response.ok) {
-        throw new Error('UIの生成に失敗しました')
-      }
-
-      const data = await response.json()
-      setGeneratedUI(data.ui)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'エラーが発生しました')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleReset = () => {
-    setGeneratedUI(null)
-    setError(null)
+  if (session?.user) {
+    redirect('/dashboard')
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4">
-        <header className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <div>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             パーソナライズされたUI生成
-          </h1>
-          <p className="text-gray-600">
+          </h2>
+          <p className="mt-2 text-center text-sm text-gray-600">
             あなたの嗜好に基づいてLLMが動的にUIを生成します
           </p>
-        </header>
-
-        {error && (
-          <div className="max-w-2xl mx-auto mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-            {error}
-          </div>
-        )}
-
-        {!generatedUI ? (
-          <PreferencesForm onGenerate={handleGenerate} isLoading={isLoading} />
-        ) : (
+        </div>
+        <div className="bg-white p-8 rounded-lg shadow-lg">
           <div className="space-y-6">
             <div className="text-center">
-              <button
-                onClick={handleReset}
-                className="px-6 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
-              >
-                新しいUIを生成
-              </button>
+              <p className="text-gray-600 mb-4">
+                開始するにはログインしてください
+              </p>
+              <AuthButton />
             </div>
-            <DynamicUI ui={generatedUI} />
+            <div className="text-center">
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                機能
+              </h3>
+              <ul className="text-sm text-gray-600 space-y-1">
+                <li>• AIとの対話でUIを生成・修正</li>
+                <li>• ユーザー固有のUIを保存</li>
+                <li>• リアルタイムでのUI更新</li>
+                <li>• パーソナライズされたダッシュボード</li>
+              </ul>
+            </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   )

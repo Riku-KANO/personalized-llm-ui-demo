@@ -24,7 +24,7 @@ export interface UIComponent {
 }
 
 export interface GeneratedUI {
-  type: 'dashboard' | 'profile' | 'gallery' | 'blog' | 'shop'
+  type: 'dashboard' | 'profile' | 'gallery' | 'blog' | 'shop' | 'complex'
   title: string
   description: string
   primaryColor: string
