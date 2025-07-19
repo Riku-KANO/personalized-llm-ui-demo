@@ -5,6 +5,7 @@ import { GeneratedUI } from '@/types/ui'
 
 interface ChatInterfaceProps {
   userId: string
+  onUIUpdate?: (ui: any) => void // UIが更新されたときのコールバック
 }
 
 interface Message {
@@ -14,7 +15,7 @@ interface Message {
   timestamp: Date
 }
 
-export default function ChatInterface({ userId }: ChatInterfaceProps) {
+export default function ChatInterface({ userId, onUIUpdate }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -59,6 +60,7 @@ export default function ChatInterface({ userId }: ChatInterfaceProps) {
       }
 
       const data = await response.json()
+      console.log('チャットレスポンス:', data) // デバッグログ
       
       const aiMessage: Message = {
         id: `ai-${Date.now()}`,
@@ -69,8 +71,13 @@ export default function ChatInterface({ userId }: ChatInterfaceProps) {
 
       setMessages(prev => [...prev, aiMessage])
       
-      // Reload the page to show the updated UI
-      window.location.reload()
+      // UIが更新されたことを親コンポーネントに通知
+      if (onUIUpdate && data.ui) {
+        console.log('UI更新を実行:', data.ui) // デバッグログ
+        onUIUpdate(data.ui)
+      } else {
+        console.log('UI更新なし - onUIUpdate:', !!onUIUpdate, 'data.ui:', !!data.ui) // デバッグログ
+      }
     } catch (error) {
       console.error('Error sending message:', error)
       const errorMessage: Message = {

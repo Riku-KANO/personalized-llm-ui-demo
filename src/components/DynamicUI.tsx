@@ -1,6 +1,7 @@
 'use client'
 
 import { UIComponent, GeneratedUI } from '@/types/ui'
+import { CSSProperties } from 'react'
 
 interface DynamicUIProps {
   ui: GeneratedUI
@@ -34,7 +35,7 @@ export default function DynamicUI({ ui }: DynamicUIProps) {
       case 'relative': return 'relative'
       case 'fixed': return 'fixed'
       case 'sticky': return 'sticky'
-      default: return 'relative'
+      default: return ''
     }
   }
 
@@ -55,7 +56,7 @@ export default function DynamicUI({ ui }: DynamicUIProps) {
       case 'end': return 'items-end'
       case 'stretch': return 'items-stretch'
       case 'baseline': return 'items-baseline'
-      default: return 'items-start'
+      default: return ''
     }
   }
 
@@ -67,7 +68,7 @@ export default function DynamicUI({ ui }: DynamicUIProps) {
       case 'between': return 'justify-between'
       case 'around': return 'justify-around'
       case 'evenly': return 'justify-evenly'
-      default: return 'justify-start'
+      default: return ''
     }
   }
 
@@ -91,7 +92,7 @@ export default function DynamicUI({ ui }: DynamicUIProps) {
       case 'md': return 'p-4'
       case 'lg': return 'p-6'
       case 'xl': return 'p-8'
-      default: return 'p-4'
+      default: return ''
     }
   }
 
@@ -103,7 +104,7 @@ export default function DynamicUI({ ui }: DynamicUIProps) {
       case 'md': return 'm-4'
       case 'lg': return 'm-6'
       case 'xl': return 'm-8'
-      default: return 'm-0'
+      default: return ''
     }
   }
 
@@ -132,53 +133,74 @@ export default function DynamicUI({ ui }: DynamicUIProps) {
     }
   }
 
-  const getLayoutClass = () => {
-    switch (ui.layout) {
-      case 'horizontal': return 'flex flex-row flex-wrap'
-      case 'sidebar-left': return 'flex flex-row'
-      case 'sidebar-right': return 'flex flex-row-reverse'
-      case 'grid': return 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
-      case 'complex': return 'flex flex-col'
-      default: return 'flex flex-col space-y-6'
+  const getPositionStyles = (position?: string): CSSProperties => {
+    if (!position) return {}
+    
+    switch (position) {
+      case 'left':
+        return { left: 0 }
+      case 'right':
+        return { right: 0 }
+      case 'center':
+        return { left: '50%', transform: 'translateX(-50%)' }
+      case 'top':
+        return { top: 0 }
+      case 'bottom':
+        return { bottom: 0 }
+      default:
+        return {}
     }
   }
 
   const renderComponent = (component: UIComponent, index: number) => {
-    const baseStyle = {
+    const baseStyle: CSSProperties = {
       backgroundColor: component.backgroundColor,
       color: component.textColor,
       borderColor: component.borderColor,
       order: component.order,
       zIndex: component.zIndex,
+      ...getPositionStyles(component.position)
     }
 
     const customClasses = component.customStyle || ''
     const widthClass = getWidthClass(component.width)
     const heightClass = getHeightClass(component.height)
     const positionClass = getPositionClass(component.position)
-    const flexDirectionClass = getFlexDirectionClass(component.flexDirection)
-    const alignItemsClass = getAlignItemsClass(component.alignItems)
-    const justifyContentClass = getJustifyContentClass(component.justifyContent)
-    const gapClass = getGapClass(component.gap)
     const paddingClass = getPaddingClass(component.padding)
     const marginClass = getMarginClass(component.margin)
-    const gridColsClass = getGridColsClass(component.gridCols)
-    const gridRowsClass = getGridRowsClass(component.gridRows)
     
-    const isFlexLayout = ui.layout === 'horizontal' || ui.layout.includes('sidebar') || ui.layout === 'complex'
     const isFlexComponent = component.type === 'flex'
     const isGridComponent = component.type === 'grid'
     
-    const wrapperClasses = [
+    let wrapperClasses = [
       widthClass,
       heightClass,
       positionClass,
       paddingClass,
       marginClass,
-      customClasses,
-      isFlexComponent ? `flex ${flexDirectionClass} ${alignItemsClass} ${justifyContentClass} ${gapClass}` : '',
-      isGridComponent ? `grid ${gridColsClass} ${gridRowsClass} ${gapClass}` : ''
+      customClasses
     ].filter(Boolean).join(' ')
+
+    if (isFlexComponent) {
+      const flexClasses = [
+        'flex',
+        getFlexDirectionClass(component.flexDirection),
+        getAlignItemsClass(component.alignItems),
+        getJustifyContentClass(component.justifyContent),
+        getGapClass(component.gap)
+      ].filter(Boolean).join(' ')
+      wrapperClasses = `${wrapperClasses} ${flexClasses}`
+    }
+
+    if (isGridComponent) {
+      const gridClasses = [
+        'grid',
+        getGridColsClass(component.gridCols),
+        getGridRowsClass(component.gridRows),
+        getGapClass(component.gap)
+      ].filter(Boolean).join(' ')
+      wrapperClasses = `${wrapperClasses} ${gridClasses}`
+    }
 
     switch (component.type) {
       case 'hero':
@@ -197,31 +219,43 @@ export default function DynamicUI({ ui }: DynamicUIProps) {
         return (
           <div 
             key={index} 
-            className={`p-6 rounded-lg shadow-lg ${wrapperClasses}`}
+            className={`rounded-lg shadow-lg ${wrapperClasses}`}
             style={baseStyle}
           >
-            <h3 className="text-xl font-semibold mb-3">{component.title}</h3>
-            <p className="opacity-80">{component.content}</p>
+            {component.title && <h3 className="text-xl font-semibold mb-3">{component.title}</h3>}
+            {component.content && <p className="opacity-80">{component.content}</p>}
+            {component.children && (
+              <div className="mt-4">
+                {component.children.map((child, childIndex) => 
+                  renderComponent(child, childIndex)
+                )}
+              </div>
+            )}
           </div>
         )
 
       case 'list':
-        const items = component.content.split('\n').filter(item => item.trim())
+        const items = component.content ? component.content.split('\n').filter(item => item.trim()) : []
         return (
           <div 
             key={index} 
-            className={`p-4 ${wrapperClasses}`}
+            className={wrapperClasses}
             style={baseStyle}
           >
-            <h3 className="text-lg font-semibold mb-3">{component.title}</h3>
-            <ul className="space-y-2">
-              {items.map((item, itemIndex) => (
-                <li key={itemIndex} className="flex items-center">
-                  <span className="w-2 h-2 bg-current rounded-full mr-3"></span>
-                  {item}
-                </li>
-              ))}
-            </ul>
+            {component.title && <h3 className="text-lg font-semibold mb-3">{component.title}</h3>}
+            {items.length > 0 && (
+              <ul className="space-y-2">
+                {items.map((item, itemIndex) => (
+                  <li key={itemIndex} className="flex items-center">
+                    <span className="w-2 h-2 bg-current rounded-full mr-3"></span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {component.children && component.children.map((child, childIndex) => 
+              renderComponent(child, childIndex)
+            )}
           </div>
         )
 
@@ -229,7 +263,7 @@ export default function DynamicUI({ ui }: DynamicUIProps) {
         return (
           <div 
             key={index} 
-            className={`text-center py-4 ${wrapperClasses}`}
+            className={`text-center ${wrapperClasses}`}
             style={baseStyle}
           >
             <button 
@@ -238,7 +272,7 @@ export default function DynamicUI({ ui }: DynamicUIProps) {
             >
               {component.title}
             </button>
-            <p className="mt-2 text-sm opacity-75">{component.content}</p>
+            {component.content && <p className="mt-2 text-sm opacity-75">{component.content}</p>}
           </div>
         )
 
@@ -246,75 +280,101 @@ export default function DynamicUI({ ui }: DynamicUIProps) {
         return (
           <div 
             key={index} 
-            className={`p-4 ${wrapperClasses}`}
+            className={wrapperClasses}
             style={baseStyle}
           >
-            <h3 className="text-lg font-semibold mb-2">{component.title}</h3>
-            <p className="leading-relaxed">{component.content}</p>
+            {component.title && <h3 className="text-lg font-semibold mb-2">{component.title}</h3>}
+            {component.content && <p className="leading-relaxed">{component.content}</p>}
+            {component.children && component.children.map((child, childIndex) => 
+              renderComponent(child, childIndex)
+            )}
           </div>
         )
 
       case 'sidebar':
         return (
-          <div 
+          <aside 
             key={index} 
-            className={`p-4 h-screen overflow-y-auto ${wrapperClasses}`}
+            className={`overflow-y-auto ${wrapperClasses}`}
             style={baseStyle}
           >
-            <h3 className="text-lg font-semibold mb-4">{component.title}</h3>
-            <nav className="space-y-2">
-              {component.content.split('\n').filter(item => item.trim()).map((item, itemIndex) => (
-                <a key={itemIndex} href="#" className="block px-2 py-1 rounded hover:bg-black hover:bg-opacity-10">
-                  {item}
-                </a>
-              ))}
-            </nav>
-          </div>
+            {component.title && <h3 className="text-lg font-semibold mb-4">{component.title}</h3>}
+            {component.content && (
+              <nav className="space-y-2">
+                {component.content.split('\n').filter(item => item.trim()).map((item, itemIndex) => (
+                  <a key={itemIndex} href="#" className="block px-2 py-1 rounded hover:bg-black hover:bg-opacity-10">
+                    {item}
+                  </a>
+                ))}
+              </nav>
+            )}
+            {component.children && (
+              <div className="mt-4">
+                {component.children.map((child, childIndex) => 
+                  renderComponent(child, childIndex)
+                )}
+              </div>
+            )}
+          </aside>
         )
 
       case 'navigation':
         return (
           <nav 
             key={index} 
-            className={`p-4 ${wrapperClasses}`}
+            className={wrapperClasses}
             style={baseStyle}
           >
-            <h3 className="text-lg font-semibold mb-3">{component.title}</h3>
+            {component.title && <h3 className="text-lg font-semibold mb-3">{component.title}</h3>}
             <div className="flex flex-wrap gap-4">
-              {component.content.split('\n').filter(item => item.trim()).map((item, itemIndex) => (
+              {component.content && component.content.split('\n').filter(item => item.trim()).map((item, itemIndex) => (
                 <a key={itemIndex} href="#" className="px-3 py-2 rounded hover:bg-black hover:bg-opacity-10">
                   {item}
                 </a>
               ))}
             </div>
+            {component.children && component.children.map((child, childIndex) => 
+              renderComponent(child, childIndex)
+            )}
           </nav>
         )
 
       case 'content-area':
         return (
-          <div 
+          <main 
             key={index} 
-            className={`p-6 flex-1 ${wrapperClasses}`}
+            className={`flex-1 ${wrapperClasses}`}
             style={baseStyle}
           >
-            <h2 className="text-2xl font-bold mb-4">{component.title}</h2>
-            <div className="prose max-w-none">
-              {component.content.split('\n').map((paragraph, pIndex) => (
-                <p key={pIndex} className="mb-4">{paragraph}</p>
-              ))}
-            </div>
-          </div>
+            {component.title && <h2 className="text-2xl font-bold mb-4">{component.title}</h2>}
+            {component.content && (
+              <div className="prose max-w-none">
+                {component.content.split('\n').map((paragraph, pIndex) => (
+                  paragraph.trim() && <p key={pIndex} className="mb-4">{paragraph}</p>
+                ))}
+              </div>
+            )}
+            {component.children && (
+              <div className="mt-4">
+                {component.children.map((child, childIndex) => 
+                  renderComponent(child, childIndex)
+                )}
+              </div>
+            )}
+          </main>
         )
 
       case 'container':
         return (
           <div 
             key={index} 
-            className={`${wrapperClasses}`}
+            className={wrapperClasses}
             style={baseStyle}
           >
             {component.title && <h3 className="text-lg font-semibold mb-2">{component.title}</h3>}
-            {component.children && component.children.map((child, childIndex) => renderComponent(child, childIndex))}
+            {component.children && component.children.map((child, childIndex) => 
+              renderComponent(child, childIndex)
+            )}
           </div>
         )
 
@@ -322,13 +382,17 @@ export default function DynamicUI({ ui }: DynamicUIProps) {
         return (
           <section 
             key={index} 
-            className={`${wrapperClasses}`}
+            className={wrapperClasses}
             style={baseStyle}
           >
             {component.title && <h2 className="text-2xl font-bold mb-4">{component.title}</h2>}
-            <div className="space-y-4">
-              {component.children && component.children.map((child, childIndex) => renderComponent(child, childIndex))}
-            </div>
+            {component.children && (
+              <div className="space-y-4">
+                {component.children.map((child, childIndex) => 
+                  renderComponent(child, childIndex)
+                )}
+              </div>
+            )}
           </section>
         )
 
@@ -336,12 +400,18 @@ export default function DynamicUI({ ui }: DynamicUIProps) {
         return (
           <header 
             key={index} 
-            className={`${wrapperClasses}`}
+            className={wrapperClasses}
             style={baseStyle}
           >
-            <h1 className="text-3xl font-bold">{component.title}</h1>
+            {component.title && <h1 className="text-3xl font-bold">{component.title}</h1>}
             {component.content && <p className="text-lg mt-2">{component.content}</p>}
-            {component.children && component.children.map((child, childIndex) => renderComponent(child, childIndex))}
+            {component.children && (
+              <div className="mt-4">
+                {component.children.map((child, childIndex) => 
+                  renderComponent(child, childIndex)
+                )}
+              </div>
+            )}
           </header>
         )
 
@@ -349,14 +419,20 @@ export default function DynamicUI({ ui }: DynamicUIProps) {
         return (
           <footer 
             key={index} 
-            className={`${wrapperClasses}`}
+            className={wrapperClasses}
             style={baseStyle}
           >
             <div className="text-center">
-              <h3 className="text-lg font-semibold mb-2">{component.title}</h3>
+              {component.title && <h3 className="text-lg font-semibold mb-2">{component.title}</h3>}
               {component.content && <p className="text-sm">{component.content}</p>}
             </div>
-            {component.children && component.children.map((child, childIndex) => renderComponent(child, childIndex))}
+            {component.children && (
+              <div className="mt-4">
+                {component.children.map((child, childIndex) => 
+                  renderComponent(child, childIndex)
+                )}
+              </div>
+            )}
           </footer>
         )
 
@@ -364,11 +440,13 @@ export default function DynamicUI({ ui }: DynamicUIProps) {
         return (
           <div 
             key={index} 
-            className={`${wrapperClasses}`}
+            className={wrapperClasses}
             style={baseStyle}
           >
             {component.title && <h3 className="text-lg font-semibold mb-2">{component.title}</h3>}
-            {component.children && component.children.map((child, childIndex) => renderComponent(child, childIndex))}
+            {component.children && component.children.map((child, childIndex) => 
+              renderComponent(child, childIndex)
+            )}
           </div>
         )
 
@@ -376,16 +454,35 @@ export default function DynamicUI({ ui }: DynamicUIProps) {
         return (
           <div 
             key={index} 
-            className={`${wrapperClasses}`}
+            className={wrapperClasses}
             style={baseStyle}
           >
             {component.title && <h3 className="text-lg font-semibold mb-2">{component.title}</h3>}
-            {component.children && component.children.map((child, childIndex) => renderComponent(child, childIndex))}
+            {component.children && component.children.map((child, childIndex) => 
+              renderComponent(child, childIndex)
+            )}
           </div>
         )
 
       default:
         return null
+    }
+  }
+
+  const getMainLayoutClass = () => {
+    switch (ui.layout) {
+      case 'horizontal':
+        return 'flex flex-row flex-wrap gap-6'
+      case 'sidebar-left':
+        return 'flex flex-row min-h-screen'
+      case 'sidebar-right':
+        return 'flex flex-row-reverse min-h-screen'
+      case 'grid':
+        return 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
+      case 'complex':
+        return 'min-h-screen relative'
+      default:
+        return 'flex flex-col gap-6'
     }
   }
 
@@ -403,7 +500,7 @@ export default function DynamicUI({ ui }: DynamicUIProps) {
           </div>
         </div>
 
-        <div className={`p-6 ${getLayoutClass()}`}>
+        <div className={`${getMainLayoutClass()}`}>
           {ui.components.map((component, index) => renderComponent(component, index))}
         </div>
 

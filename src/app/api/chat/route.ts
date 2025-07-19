@@ -96,12 +96,13 @@ export async function POST(request: NextRequest) {
 2. 現在のUIがある場合は、それを基に修正する
 3. 新しいUIを作成する場合は、ユーザーの要求に合わせて設計する
 4. 日本語でコンテンツを作成する
-5. 適切な階層構造を使用する
+5. 適切な階層構造を使用する（childrenを活用）
 
 レイアウト設定について：
 - layout: 'vertical' (縦配置), 'horizontal' (横配置), 'sidebar-left' (左サイドバー), 'sidebar-right' (右サイドバー), 'grid' (グリッド配置), 'complex' (複雑な階層構造)
 - コンポーネントの width: 'full' (100%), 'half' (50%), 'third' (33%), 'quarter' (25%), 'sidebar' (サイドバー幅), 'auto' (自動), 'fit' (内容に合わせて)
 - height: 'auto' (自動), 'screen' (画面高さ), 'full' (100%), 'fit' (内容に合わせて)
+- position: 'absolute', 'relative', 'fixed', 'sticky', 'left', 'right', 'center', 'top', 'bottom'
 
 コンポーネントタイプについて：
 - hero: メインビジュアル
@@ -109,20 +110,32 @@ export async function POST(request: NextRequest) {
 - list: リスト表示
 - button: ボタン
 - text: テキストエリア
-- sidebar: サイドバー
+- sidebar: サイドバー（固定幅推奨）
 - navigation: ナビゲーション
-- content-area: コンテンツエリア
+- content-area: メインコンテンツエリア（flex-1推奨）
 - container: 汎用コンテナ（子要素を持つ）
-- section: セクション要素
-- header: ヘッダー要素
-- footer: フッター要素
-- flex: フレックスボックスレイアウト
-- grid: グリッドレイアウト
+- section: セクション要素（子要素を持つ）
+- header: ヘッダー要素（位置固定可能）
+- footer: フッター要素（位置固定可能）
+- flex: フレックスボックスレイアウト（flexDirection, alignItems, justifyContent設定可能）
+- grid: グリッドレイアウト（gridCols, gridRows設定可能）
+
+複雑なレイアウトの例：
+1. ヘッダー + サイドバー + メインコンテンツ:
+   - layout: 'complex'
+   - ヘッダー: position='sticky', top=0, width='full', zIndex=10
+   - flexコンテナ: flexDirection='row', height='screen'
+     - サイドバー: width='sidebar', height='full'
+     - content-area: width='full', padding='md'
+
+2. グリッドレイアウト:
+   - gridコンポーネント: gridCols=3, gap='md'
+   - 子要素としてcardコンポーネントを配置
 
 親子関係について：
 - childrenプロパティを使用して階層構造を表現
-- containerやsectionなどのコンテナコンポーネントは子要素を持つことができる
-- flexやgridコンポーネントは子要素のレイアウトを制御
+- コンテナ系コンポーネント（container, section, flex, grid, header, footer）は子要素を持つことができる
+- 子要素は親要素のレイアウトルールに従う
 
 カラー設定について：
 - primaryColor, accentColor: #で始まるhexコード

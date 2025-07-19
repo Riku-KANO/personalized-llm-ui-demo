@@ -3,11 +3,10 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
-import DynamicUI from '@/components/DynamicUI'
 import { GeneratedUI } from '@/types/ui'
 import AuthButton from '@/components/AuthButton'
-import ChatInterface from '@/components/ChatInterface'
 import DashboardSkeleton from '@/components/DashboardSkeleton'
+import DashboardClient from '@/components/DashboardClient'
 
 async function DashboardContent({ userId }: { userId: string }) {
   // Get user's active UI
@@ -41,32 +40,11 @@ async function DashboardContent({ userId }: { userId: string }) {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      <div className="lg:col-span-2">
-        {parsedUI ? (
-          <DynamicUI ui={parsedUI} />
-        ) : (
-          <div className="bg-white rounded-lg shadow-lg p-8 text-center">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">
-              まだUIが生成されていません
-            </h2>
-            <p className="text-gray-600 mb-6">
-              右側のチャットでUIを生成してください
-            </p>
-            {userPreferences && (
-              <div className="text-sm text-gray-500">
-                <p>保存されている嗜好:</p>
-                <p className="italic">{userPreferences.preferences}</p>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-      
-      <div className="lg:col-span-1">
-        <ChatInterface userId={userId} />
-      </div>
-    </div>
+    <DashboardClient 
+      userId={userId}
+      initialUI={parsedUI}
+      userPreferences={userPreferences?.preferences || null}
+    />
   )
 }
 

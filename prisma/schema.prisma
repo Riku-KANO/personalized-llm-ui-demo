@@ -47,6 +47,7 @@ model User {
   preferences   UserPreference[]
   uis           UserUI[]
   conversations Conversation[]
+  evaluations   UIEvaluation[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -85,4 +86,15 @@ model Conversation {
   response  String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
+}
+
+model UIEvaluation {
+  id               String   @id @default(cuid())
+  userId           String
+  userPrompt       String
+  uiData           String   // JSON string of GeneratedUI
+  evaluationResult String   // JSON string of UIEvaluationResult
+  score            Float
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt        DateTime @default(now())
 }
